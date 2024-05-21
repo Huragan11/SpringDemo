@@ -1,5 +1,6 @@
 package com.example.demo.student;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,5 +34,20 @@ public class StudentService {
             throw new IllegalStateException("Student with id " + studentId + " does not exist");
         }
         studentRepository.deleteById(studentId);
+    }
+
+    @Transactional
+    public void updateStudent(Long studentId, String name, String email) {
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new IllegalStateException("Student with email " + email + " does not exist"));
+        if (name != null && !name.isEmpty() && !student.getName().equals(name)) {
+            student.setName(name);
+        }
+        if (email != null && !email.isEmpty() && !student.getEmail().equals(email)) {
+            Optional<Student> studentOptional = studentRepository.findStudentByEmail(email);
+            if (studentOptional.isPresent()) {
+                throw new IllegalStateException("Student with email " + email + " already exists");
+            }
+            student.setEmail(email);
+        }
     }
 }
